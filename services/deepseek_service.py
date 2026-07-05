@@ -39,17 +39,9 @@ system_prompt ="""
 
 Перед написанием оцени, требуются ли актуальные данные.
 
-Используй search_web только если статья содержит:
-- последние новости;
-- текущие цены;
-- статистику;
-- события;
-- рейтинги;
-- изменения законодательства;
-- обновления продуктов, сервисов или технологий;
-- любую информацию, которая могла измениться после обучения модели.
+Запрещено использовать search_web для образовательных, исторических, обзорных и объясняющих статей.
 
-Если статья носит образовательный, справочный или обзорный характер и не требует актуальных данных, не используй search_web.
+Вызывай search_web исключительно в случаях, когда без него невозможно получить корректный ответ из-за необходимости использовать актуальные данные.
 
 Правила написания:
 
@@ -71,9 +63,11 @@ system_prompt ="""
 available_tools = {
     "search_web": search_web,
 }
-def build_user_promt(topic: str):
+def build_user_promt(topic: str,description: str):
     return f"""
     Напиши качественную статью на тему: {topic}
+    Описание статьи: {description}
+
     Требования:
 
     - Заголовок.
@@ -98,7 +92,7 @@ def build_user_promt(topic: str):
     """
 
 
-async def ask_agent(user_topic: str) -> str:
+async def ask_agent(user_topic: str,description: str) -> str:
     messages = [
         {
             "role": "system",
@@ -107,7 +101,7 @@ async def ask_agent(user_topic: str) -> str:
         },
         {
             "role": "user",
-            "content": build_user_promt(user_topic),
+            "content": build_user_promt(user_topic,description),
         },
     ]
 
@@ -145,6 +139,7 @@ async def ask_agent(user_topic: str) -> str:
     )
 
     return second_response.choices[0].message.content
+
 
     
     

@@ -22,8 +22,17 @@ builder.button(
     callback_data="stop",
 )
 
+builder.button(
+    text="📊 Статистика",
+    callback_data="stats",
+)
+builder.button(
+    text="✍️ Сгенерировать сейчас",
+    callback_data="generate_article",
+)
 
 
-builder.adjust(1)
+
+builder.adjust(1,1,2,1,1)
 
 keyboard = builder.as_markup()

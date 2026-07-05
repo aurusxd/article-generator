@@ -21,6 +21,6 @@ class Topic(Base):
 
     is_enabled: Mapped[bool] = mapped_column(default=True)
 
-    created_at: Mapped[datetime] = mapped_column(DateTime,default=func.now())
+    created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True),default=func.now())
 
 
