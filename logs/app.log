@@ -1,0 +1,22 @@
+[2026-07-04 15:53:17.365] [INFO    ] [__main__:9] - 🚀 Запуск бота
+[2026-07-04 15:53:18.170] [SUCCESS ] [telegram.command_handler:61] - Бот mypersonal_agentBot успешно запущен!
+[2026-07-04 15:53:22.611] [INFO    ] [telegram.command_handler:55] - Вызвана команда /start
+[2026-07-04 15:53:35.636] [INFO    ] [telegram.bot:26] - Сообщение от 1586025363:gnfdfhjjjj: Спорт - что же это?
+[2026-07-04 15:57:15.638] [INFO    ] [telegram.bot:26] - Сообщение от 1586025363:gnfdfhjjjj: Спорт - что же это?
+[2026-07-04 15:58:49.485] [INFO    ] [services.tools.web_search:12] - Зашел в search_web
+[2026-07-04 15:58:52.024] [INFO    ] [services.tools.web_search:12] - Зашел в search_web
+[2026-07-04 15:58:54.007] [INFO    ] [services.tools.web_search:12] - Зашел в search_web
+[2026-07-04 16:07:12.749] [INFO    ] [__main__:9] - 🚀 Запуск бота
+[2026-07-04 16:07:14.616] [SUCCESS ] [telegram.command_handler:61] - Бот mypersonal_agentBot успешно запущен!
+[2026-07-04 16:07:23.255] [INFO    ] [telegram.bot:26] - Сообщение от 1586025363:gnfdfhjjjj: Зачем нужен спорт
+[2026-07-04 16:08:32.223] [INFO    ] [telegram.bot:26] - Сообщение от 1586025363:gnfdfhjjjj: Зачем нужен спорт
+[2026-07-04 16:09:06.252] [INFO    ] [telegram.bot:26] - Сообщение от 1586025363:gnfdfhjjjj: Зачем нужен спорт
+[2026-07-04 16:12:35.448] [INFO    ] [__main__:9] - 🚀 Запуск бота
+[2026-07-04 16:12:36.432] [SUCCESS ] [telegram.command_handler:61] - Бот mypersonal_agentBot успешно запущен!
+[2026-07-04 16:12:36.660] [INFO    ] [telegram.command_handler:55] - Вызвана команда /start
+[2026-07-04 16:12:44.969] [INFO    ] [telegram.bot:26] - Сообщение от 1586025363:gnfdfhjjjj: Зачем нужен спорт
+[2026-07-04 16:12:49.163] [INFO    ] [services.tools.web_search:12] - Зашел в search_web
+[2026-07-04 16:14:59.185] [INFO    ] [__main__:9] - 🚀 Запуск бота
+[2026-07-04 16:15:00.167] [SUCCESS ] [telegram.command_handler:61] - Бот mypersonal_agentBot успешно запущен!
+[2026-07-04 16:15:07.551] [INFO    ] [telegram.bot:26] - Сообщение от 1586025363:gnfdfhjjjj: Красное мясо - зачем его есть?
+[2026-07-04 16:17:16.285] [INFO    ] [telegram.bot:26] - Сообщение от 1586025363:gnfdfhjjjj: Расскажи про блокчейн и что это такое
