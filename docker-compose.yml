@@ -11,13 +11,16 @@ services:
       POSTGRES_DB: ${POSTGRES_DB}
     ports:
       - "5433:5432"
-    bot:
-      build: .
+  bot:
+    build: .
 
-      restart: always
+    restart: always
 
-      env_file:
-        - .env
+    env_file:
+      - .env
 
-      depends_on:
-        - postgres
+    depends_on:
+      - postgres
+  api:
+    build: .
+    command: uv run uvicorn main:app --host 127.0.0.1 --port 8000
