@@ -30,3 +30,10 @@ services:
       - .env
     depends_on:
       - db
+  migrations:
+    build: .
+    command: uv run alembic ugrade head
+    ports:
+      - "5433:5432"
+    depends_on:
+      - db
