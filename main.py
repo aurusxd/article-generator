@@ -2,7 +2,7 @@ import asyncio
 
 from services.logger import log
 from telegram.bot import bot, dp
-
+from apscheduler.schedulers.asyncio import AsyncIOScheduler
 
 async def main():
     try:

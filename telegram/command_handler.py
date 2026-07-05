@@ -3,7 +3,6 @@ import asyncio
 from aiogram import Bot, Dispatcher
 from aiogram.types import Message
 import aiohttp
-
 from api.client import ApiClient, EmptyResponseError, ResponseValidationError
 from services.logger import log
 
@@ -47,7 +46,7 @@ class BotCommandHandler:
         except Exception as exc:  # noqa: BLE001
             await message.answer(f"Unexpected error: {exc}")
             return
-
+        log.info(f"Ответ пользователю {user_id}: {answer}")
         await message.answer(answer)
 
     async def start(self, message: Message) -> None:

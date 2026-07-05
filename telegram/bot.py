@@ -5,6 +5,7 @@ from api.client import ApiClient
 from services.logger import log
 from telegram.command_handler import BotCommandHandler
 from config import BOT_TOKEN
+from telegram.keyboards.main import main_keyboard
 
 bot = Bot(token=BOT_TOKEN)
 dp = Dispatcher()
@@ -13,8 +14,11 @@ command_handler = BotCommandHandler(api_client=api_client)
 dp.startup.register(command_handler.on_startup)
 
 @dp.message(CommandStart())
-async def start_handler(message: types.Message):
-    await command_handler.start(message)
+async def start(message: types.Message):
+    await message.answer(
+        "Добро пожаловать!",
+        reply_markup=main_keyboard,
+    )
 
 
 @dp.message()
