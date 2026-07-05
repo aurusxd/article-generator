@@ -22,8 +22,8 @@ class DbConfig(BaseModel):
     POSTGRES_USER: str
     POSTGRES_PASSWORD: str
     POSTGRES_DB: str
-    POSTGRES_PORT: int = 5433
-    POSTGRES_HOST: str = "localhost"
+    POSTGRES_PORT: int = 5432
+    POSTGRES_HOST: str = "db"
 
     @property
     def database_url(self) -> str:
