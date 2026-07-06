@@ -1,5 +1,3 @@
-import random
-
 from apscheduler.schedulers.asyncio import AsyncIOScheduler
 
 from services.telegram_autopost import TelegramPostService
@@ -7,12 +5,9 @@ from config import TELEGRAM_CHANNEL_ID, config
 from services.logger import log
 from services.deepseek_service import ask_agent
 from services.topic_service import topic_service
+from services.publication_log_service import publication_log_service
 from telegram.bot import bot
-
-telegram_post_service = TelegramPostService(
-    bot=bot,
-    channel_id=TELEGRAM_CHANNEL_ID,
-)
+from utils.publish_times import generate_publish_times, is_time_to_publish
 
 class SchedulerService:
     def __init__(self) -> None:
@@ -65,38 +60,62 @@ class SchedulerService:
         try:
             topics = await topic_service.get_all_topics()
 
-            enabled_topics = [
-                topic for topic in topics
-                if topic.is_enabled and topic.posts_per_day > 0
-            ]
+            for topic in topics:
+                if not topic.is_enabled:
+                    continue
 
-            if not enabled_topics:
-                log.info("Нет активных тематик для автопостинга")
-                return
+                publish_times = generate_publish_times(
+                    posts_per_day=topic.posts_per_day,
+                    start_hour=8,
+                    end_hour=23
+                )
+                for times in publish_times:
+                    if not is_time_to_publish(times):
+                        continue
 
-            topic = random.choice(enabled_topics)
+                    already_published = await publication_log_service.was_published_today_at(
+                        topic_id=topic.id,
+                        planned_time=times,
+                        platform="telegram"
+                    )
+                    if already_published:
+                        continue
 
-            article, image_path = await ask_agent(
-                topic.name,
-                topic.description,
-                topic.with_photo,
-                return_image_path=True,
-            )
+                    article, image_path = await ask_agent(
+                        topic.name,
+                        topic.description,
+                        topic.with_photo,
+                        return_image_path=True
+                    )
 
-            if not article:
-                log.warning("ИИ не сгенерировал статью")
-                return
+                    if not article:
+                        log.warning(f"Article was not generated. Topic: {topic.name}")
+                        await publication_log_service.create_log(
+                            topic_id=topic.id,
+                            platform="telegram",
+                            status="error",
+                            planned_time=times,
+                            error="article_not_generated",
+                        )
+                        continue
 
-            success = await self.telegram_post_service.publish_article(
-                text=article,
-                with_photo=topic.with_photo,
-                image_path=image_path,
-            )
-
-            if success:
-                log.info(f"Автопостинг выполнен. Тема: {topic.name}")
-            else:
-                log.warning(f"Автопостинг не выполнен. Тема: {topic.name}")
+                    success = await self.telegram_post_service.publish_article(
+                        text=article,
+                        with_photo=topic.with_photo,
+                        image_path=image_path
+                    )
+                    
+                    await publication_log_service.create_log(
+                        topic_id=topic.id,
+                        platform="telegram",
+                        status="success" if success else "error",
+                        planned_time=times
+                    )
+                    
+                    if success:
+                        log.info(f"Автопостинг выполнен. Тема: {topic.name}")
+                    else:
+                        log.warning(f"Автопостинг не выполнен. Тема: {topic.name}")
 
         except Exception:
             log.exception("Ошибка автопостинга")
