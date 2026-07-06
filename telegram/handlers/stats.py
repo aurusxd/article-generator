@@ -15,7 +15,7 @@ router = Router()
 
 @router.callback_query(F.data == "stats")
 async def show_stats(callback: CallbackQuery):
-    list = await publication_log_service.get_topic_logs()
+    list = await publication_log_service.get_all_logs()
     await callback.message.edit_text(
         text = f"Постов отправлено: {len(list)}",
         reply_markup=keyboard,

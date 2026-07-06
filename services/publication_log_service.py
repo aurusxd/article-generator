@@ -140,6 +140,20 @@ class PublicationLogService:
         except SQLAlchemyError:
             log.exception("Ошибка при получении логов тематики")
             return []
+    
+    @provider.inject_session
+    async def get_all_logs(
+        self,
+        session: AsyncSession,
+    ) -> list[PublicationLog]:
+        try:
+            result = await session.scalars(select(PublicationLog))
+
+            return list(result.all())
+
+        except SQLAlchemyError:
+            log.exception("Ошибка при получении логов тематики")
+            return []
 
 
 publication_log_service = PublicationLogService()
