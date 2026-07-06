@@ -16,3 +16,6 @@ def extract_photo_description(text: str):
     desc = match.group(1).strip()
     cleaned_text = text.replace(match.group(0), "").strip()
     return desc, cleaned_text
+
+def truncate_text(text: str, limit: int = 1024) -> str:
+    return text if len(text) <= limit else text[:limit - 3] + "..."

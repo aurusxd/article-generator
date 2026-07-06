@@ -109,7 +109,7 @@ async def open_topic(
         callback_data="back",
     )
 
-    builder.adjust(1)
+    builder.adjust(2,2,2,1)
 
     await callback.message.edit_text(
         text=(

@@ -3629,3 +3629,26 @@ Traceback (most recent call last):
 
 aiogram.exceptions.TelegramNetworkError: HTTP Client says - ServerDisconnectedError: Server disconnected
 [2026-07-05 16:09:25.369] [WARNING ] [services.scheduler_service:95] - Автопостинг не выполнен. Тема: Крипта
+[2026-07-06 11:22:12.804] [INFO    ] [services.image_service:11] - зашел в generate_image
+[2026-07-06 11:22:12.806] [ERROR   ] [services.image_service:27] - ❌ Ошибка генерации изображения: type object 'datetime.time' has no attribute 'time'
+[2026-07-06 11:22:12.820] [ERROR   ] [services.deepseek_service:164] - ❌ Не удалось сгенерировать изображение.
+[2026-07-06 11:23:09.844] [INFO    ] [services.image_service:11] - зашел в generate_image: бегун на стадионе на закате, вокруг него размытые огни трибун и легкая дымка от дыхания на морозном воздухе
+[2026-07-06 11:23:09.845] [ERROR   ] [services.image_service:27] - ❌ Ошибка генерации изображения: type object 'datetime.time' has no attribute 'time'
+[2026-07-06 11:23:09.845] [ERROR   ] [services.deepseek_service:164] - ❌ Не удалось сгенерировать изображение.
+[2026-07-06 11:24:15.333] [INFO    ] [services.image_service:10] - зашел в generate_image: марафонец пересекает финишную черту на городском стадионе, на фоне трибун с болельщиками
+[2026-07-06 11:24:15.334] [ERROR   ] [services.image_service:26] - ❌ Ошибка генерации изображения: 'coroutine' object has no attribute 'wait'
+[2026-07-06 11:24:15.336] [ERROR   ] [services.deepseek_service:164] - ❌ Не удалось сгенерировать изображение.
+[2026-07-06 11:25:55.824] [INFO    ] [services.image_service:10] - зашел в generate_image: бегун на стадионе на закате, его тень вытягивается по беговой дорожке
+[2026-07-06 11:25:55.826] [ERROR   ] [services.image_service:26] - ❌ Ошибка генерации изображения: object AsyncImageGenerationModel can't be used in 'await' expression
+[2026-07-06 11:25:55.826] [ERROR   ] [services.deepseek_service:164] - ❌ Не удалось сгенерировать изображение.
+[2026-07-06 11:26:30.089] [INFO    ] [services.image_service:10] - зашел в generate_image: беговая дорожка стадиона, на которой спортсмен в красной форме финиширует, а за ним видна трибуна с болельщиками
+[2026-07-06 11:26:30.756] [ERROR   ] [services.image_service:26] - ❌ Ошибка генерации изображения: <AioRpcError of RPC that terminated with:
+	code = StatusCode.PERMISSION_DENIED
+	details = "Permission denied"
+	debug_error_string = "PERMISSION_DENIED:Permission denied"
+	endpoint = "llm.api.cloud.yandex.net:443"
+	stub_class = ImageGenerationAsyncServiceStub
+	x-client-request-id = "d1ef753e-4a68-4800-a9ef-024eaed9cb15"
+>
+[2026-07-06 11:26:30.756] [ERROR   ] [services.deepseek_service:164] - ❌ Не удалось сгенерировать изображение.
+[2026-07-06 11:30:40.151] [INFO    ] [services.image_service:10] - зашел в generate_image: бегут марафонцы на городской трассе, на заднем плане восход солнца, брызги пота разлетаются в лучах света

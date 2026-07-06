@@ -79,6 +79,7 @@ class SchedulerService:
             article = await ask_agent(
                 topic.name,
                 topic.description,
+                topic.with_photo
             )
 
             if not article:

@@ -204,7 +204,7 @@ dependencies = [
     { name = "requests" },
     { name = "sqlalchemy" },
     { name = "uvicorn" },
-    { name = "yandex-cloud-ml-sdk" },
+    { name = "yandex-ai-studio-sdk" },
 ]
 
 [package.metadata]
@@ -222,7 +222,7 @@ requires-dist = [
     { name = "requests", specifier = ">=2.34.2" },
     { name = "sqlalchemy", specifier = ">=2.0.51" },
     { name = "uvicorn", specifier = ">=0.50.0" },
-    { name = "yandex-cloud-ml-sdk", specifier = ">=0.19.1" },
+    { name = "yandex-ai-studio-sdk", specifier = ">=0.22.0" },
 ]
 
 [[package]]
@@ -1484,18 +1484,6 @@ dependencies = [
 sdist = { url = "https://files.pythonhosted.org/packages/f7/48/b3de7e832c78473d75af81632c3d25100e9dc0e01254b290a5e7faa4e4b8/yandex_ai_studio_sdk-0.22.0.tar.gz", hash = "sha256:10fce2033be5c4fcbe1fcf485e29593867b459c96a73bc30519e4bc336fc7400", size = 236107, upload-time = "2026-06-30T14:30:33.059Z" }
 wheels = [
     { url = "https://files.pythonhosted.org/packages/f7/8b/79f2dd93984ba217de6088927f3e225d0149a58fccaca1f0c594a807aede/yandex_ai_studio_sdk-0.22.0-py3-none-any.whl", hash = "sha256:3ecb0446942b5048e9023f55fc74463c65e823a79eceda65c6d4178ca57601c2", size = 349500, upload-time = "2026-06-30T14:30:30.738Z" },
-]
-
-[[package]]
-name = "yandex-cloud-ml-sdk"
-version = "0.19.1"
-source = { registry = "https://pypi.org/simple" }
-dependencies = [
-    { name = "yandex-ai-studio-sdk" },
-]
-sdist = { url = "https://files.pythonhosted.org/packages/b0/e0/9af9bc3bd53e16a4120aa11df76273256300c8e2e61a6e1e1fbd1777ebae/yandex_cloud_ml_sdk-0.19.1.tar.gz", hash = "sha256:760f40b42a95cb67c040cbbabca447ac337833bd96bde7eae8e04f0dc9a18807", size = 6584, upload-time = "2026-01-27T18:43:50.446Z" }
-wheels = [
-    { url = "https://files.pythonhosted.org/packages/c2/fa/3f4d0c1eb4aabb088c9a51f8ff063f68cffb18f7a3785d8c60372cd4ccc3/yandex_cloud_ml_sdk-0.19.1-py3-none-any.whl", hash = "sha256:45fceb5a39bffa589d74a7a3e79ba4546d0965c52e5a5fbcd18a8cd4e9a9be2a", size = 6958, upload-time = "2026-01-27T18:43:48.526Z" },
 ]
 
 [[package]]

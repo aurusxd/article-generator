@@ -5,7 +5,9 @@ from dotenv import load_dotenv
 from openai import OpenAI
 
 from services.tools.web_search import search_web
-
+from utils.other import extract_photo_description
+from services.logger import log
+from services.image_service import image_service
 load_dotenv()
 
 client = OpenAI(
@@ -128,7 +130,7 @@ def build_user_promt(topic: str,description: str,with_photo: bool):
     """
 
 
-async def ask_agent(user_topic: str,description: str) -> str:
+async def ask_agent(user_topic: str,description: str,with_photo: bool) -> str:
     messages = [
         {
             "role": "system",
@@ -137,9 +139,12 @@ async def ask_agent(user_topic: str,description: str) -> str:
         },
         {
             "role": "user",
-            "content": build_user_promt(user_topic,description),
+            "content": build_user_promt(user_topic,description,with_photo),
         },
     ]
+
+    
+
 
     first_response = client.chat.completions.create(
         model="deepseek-v4-flash",
@@ -149,6 +154,14 @@ async def ask_agent(user_topic: str,description: str) -> str:
     )
 
     message = first_response.choices[0].message
+
+    if with_photo:
+        photo_desc, clean_text = extract_photo_description(message.content)
+        if not photo_desc:
+                log.error("❌ Не найдено описание фото. Отправляем только текст.")
+        image_path = await image_service.generate_image(description=photo_desc)
+        if not image_path:
+            log.error("❌ Не удалось сгенерировать изображение.")
 
     if not message.tool_calls:
         return message.content
@@ -169,12 +182,13 @@ async def ask_agent(user_topic: str,description: str) -> str:
             }
         )
 
-    second_response = client.chat.completions.create(
-        model="deepseek-chat",
+    result = client.chat.completions.create(
+        model="deepseek-v4-flash",
         messages=messages,
     )
 
-    return second_response.choices[0].message.content
+
+    return result.choices[0].message.content
 
 
     

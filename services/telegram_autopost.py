@@ -2,6 +2,7 @@ from aiogram import Bot
 from aiogram.exceptions import TelegramAPIError
 
 from services.logger import log
+from utils.other import sanitize_html
 
 
 class TelegramPostService:
@@ -14,8 +15,9 @@ class TelegramPostService:
         text: str,
     ) -> bool:
         try:
-            post_text = f"{text}"
-
+            text_post = sanitize_html(text)
+            post_text = f"{text_post}"
+            
             await self.bot.send_message(
                 chat_id=self.channel_id,
                 text=post_text,
