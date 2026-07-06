@@ -1,10 +1,7 @@
-import os
-import time
-
 from aiogram import Bot
 from aiogram.exceptions import TelegramAPIError
+from aiogram.types import FSInputFile
 
-from services.image_service import IMAGE_FOLDER
 from services.logger import log
 from utils.other import extract_photo_description, sanitize_html,truncate_text
 
@@ -18,24 +15,23 @@ class TelegramPostService:
         self,
         text: str,
         with_photo: bool,
+        image_path: str | None = None,
     ) -> bool:
         try:
             text_post = sanitize_html(text)
             post_text = f"{text_post}"
             
-            if with_photo:
-                image_path=os.path.join(IMAGE_FOLDER, f"img_{int(time.time())}.jpg")
-                clean_text = extract_photo_description(post_text)
+            if with_photo and image_path:
+                _, clean_text = extract_photo_description(post_text)
                 lines = clean_text.strip().split("\n")
                 caption_raw = "\n".join(lines[:2]) if len(lines) > 1 else lines[0]
                 caption = truncate_text(sanitize_html(caption_raw.strip()), 1024)
-                with open(image_path, "rb") as img:
-                    self.bot.send_photo(
-                        self.channel_id,
-                        photo=img,
-                        caption=caption,
-                        parse_mode="HTML"
-                    )
+                await self.bot.send_photo(
+                    self.channel_id,
+                    photo=FSInputFile(image_path),
+                    caption=caption,
+                    parse_mode="HTML"
+                )
                 log.info(f"Статья с фото опубликована в Telegram: {text}")
                 return True
                 

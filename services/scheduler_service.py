@@ -76,10 +76,11 @@ class SchedulerService:
 
             topic = random.choice(enabled_topics)
 
-            article = await ask_agent(
+            article, image_path = await ask_agent(
                 topic.name,
                 topic.description,
-                topic.with_photo
+                topic.with_photo,
+                return_image_path=True,
             )
 
             if not article:
@@ -88,7 +89,8 @@ class SchedulerService:
 
             success = await self.telegram_post_service.publish_article(
                 text=article,
-                with_photo=topic.with_photo
+                with_photo=topic.with_photo,
+                image_path=image_path,
             )
 
             if success:

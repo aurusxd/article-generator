@@ -130,7 +130,12 @@ def build_user_promt(topic: str,description: str,with_photo: bool):
     """
 
 
-async def ask_agent(user_topic: str,description: str,with_photo: bool) -> str:
+async def ask_agent(
+    user_topic: str,
+    description: str,
+    with_photo: bool = False,
+    return_image_path: bool = False,
+):
     messages = [
         {
             "role": "system",
@@ -155,16 +160,26 @@ async def ask_agent(user_topic: str,description: str,with_photo: bool) -> str:
 
     message = first_response.choices[0].message
 
-    if with_photo:
-        photo_desc, clean_text = extract_photo_description(message.content)
-        if not photo_desc:
-                log.error("❌ Не найдено описание фото. Отправляем только текст.")
-        image_path = await image_service.generate_image(description=photo_desc)
-        if not image_path:
-            log.error("❌ Не удалось сгенерировать изображение.")
+    async def prepare_article_photo(article_text: str):
+        image_path = None
+
+        if with_photo:
+            photo_desc, clean_text = extract_photo_description(article_text)
+            article_text = clean_text
+            if not photo_desc:
+                log.error("Photo description was not found. Sending text only.")
+            else:
+                image_path = await image_service.generate_image(description=photo_desc)
+                if not image_path:
+                    log.error("Image generation failed.")
+
+        return article_text, image_path
 
     if not message.tool_calls:
-        return message.content
+        article_text, image_path = await prepare_article_photo(message.content)
+        if return_image_path:
+            return article_text, image_path
+        return article_text
 
     messages.append(message)
 
@@ -188,7 +203,11 @@ async def ask_agent(user_topic: str,description: str,with_photo: bool) -> str:
     )
 
 
-    return result.choices[0].message.content
+    article_text, image_path = await prepare_article_photo(result.choices[0].message.content)
+    if return_image_path:
+        return article_text, image_path
+
+    return article_text
 
 
     

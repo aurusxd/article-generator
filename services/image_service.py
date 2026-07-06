@@ -1,6 +1,7 @@
 
 import os
 import time
+from pathlib import Path
 from services.logger import log
 from yandex_ai_studio_sdk import AsyncAIStudio
 IMAGE_FOLDER = "generated_images"
@@ -9,6 +10,7 @@ class ImageService:
     async def generate_image(self,description: str):
         log.info(f"зашел в generate_image: {description}")
         try:
+            Path(IMAGE_FOLDER).mkdir(parents=True, exist_ok=True)
             sdk = AsyncAIStudio(
                 folder_id=os.getenv('YANDEX_FOLDER_ID'),
                 auth=os.getenv('YANDEX_API_KEY')
