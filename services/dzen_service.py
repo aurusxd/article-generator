@@ -1,0 +1,283 @@
+import os
+import re
+from html.parser import HTMLParser
+from pathlib import Path
+
+from playwright.async_api import Page, TimeoutError as PlaywrightTimeoutError, async_playwright
+
+from services.logger import log
+
+
+class _TextExtractor(HTMLParser):
+    def __init__(self):
+        super().__init__()
+        self.parts: list[str] = []
+
+    def handle_starttag(self, tag, attrs):
+        if tag.lower() in {"br", "p", "div", "h1", "h2", "h3", "h4", "h5", "h6"}:
+            self.parts.append("\n")
+
+    def handle_endtag(self, tag):
+        if tag.lower() in {"p", "div", "h1", "h2", "h3", "h4", "h5", "h6"}:
+            self.parts.append("\n")
+
+    def handle_data(self, data):
+        self.parts.append(data)
+
+    def get_text(self) -> str:
+        text = "".join(self.parts)
+        text = re.sub(r"\n{3,}", "\n\n", text)
+        return text.strip()
+
+
+def html_to_text(text: str) -> str:
+    parser = _TextExtractor()
+    parser.feed(text or "")
+    parser.close()
+    return parser.get_text()
+
+
+def split_title_and_description(text: str, fallback_title: str = "Новая статья") -> tuple[str, str]:
+    title_match = re.search(r"<h1[^>]*>(.*?)</h1>", text or "", re.IGNORECASE | re.DOTALL)
+    if title_match:
+        title = html_to_text(title_match.group(1)).strip()
+        description = re.sub(
+            r"<h1[^>]*>.*?</h1>",
+            "",
+            text or "",
+            count=1,
+            flags=re.IGNORECASE | re.DOTALL,
+        )
+        return title or fallback_title, html_to_text(description)
+
+    plain_text = html_to_text(text or "")
+    lines = [line.strip() for line in plain_text.splitlines() if line.strip()]
+    if not lines:
+        return fallback_title, ""
+
+    return lines[0], "\n\n".join(lines[1:]).strip()
+
+
+class DzenPostService:
+    def __init__(
+        self,
+        storage_state_path: str = "/app/dzen_state.json",
+        headless: bool = True,
+    ):
+        self.storage_state_path = storage_state_path
+        self.headless = headless
+
+    async def save_article(
+        self,
+        title: str,
+        description: str,
+        image_path: str | None = None,
+    ) -> bool:
+        try:
+            if not Path(self.storage_state_path).exists():
+                log.error(f"Dzen storage state not found: {self.storage_state_path}")
+                return False
+
+            async with async_playwright() as p:
+                browser = await p.chromium.launch(headless=self.headless)
+                context = await browser.new_context(storage_state=self.storage_state_path)
+                page = await context.new_page()
+
+                try:
+                    await self._open_article_editor(page)
+
+                    if image_path:
+                        await self._upload_image(page, image_path)
+
+                    await self._fill_title(page, title)
+                    await self._fill_description(page, description)
+                    await self._save_draft(page)
+
+                    log.info(f"Dzen draft saved. Title: {title}")
+                    return True
+                finally:
+                    await context.close()
+                    await browser.close()
+
+        except Exception:
+            log.exception("Dzen autoposting failed")
+            return False
+
+    async def save_article_from_text(
+        self,
+        text: str,
+        image_path: str | None = None,
+    ) -> bool:
+        title, description = split_title_and_description(text)
+        return await self.save_article(
+            title=title,
+            description=description,
+            image_path=image_path,
+        )
+
+    async def _open_article_editor(self, page: Page) -> None:
+        await page.goto("https://dzen.ru", wait_until="domcontentloaded")
+
+        await self._click_first(
+            page,
+            [
+                '[data-stub="32"]',
+                '[data-testid="profile-button"]',
+                'button[aria-label*="рофил"]',
+            ],
+            timeout=10000,
+        )
+        await self._click_first(
+            page,
+            [
+                '[data-testid="create-button"]',
+                'button:has-text("Создать")',
+            ],
+            timeout=10000,
+        )
+        await self._click_first(
+            page,
+            [
+                '[data-testid="profile-menu-create-article"]',
+                'text=Статья',
+                'text=Написать статью',
+            ],
+            timeout=10000,
+        )
+
+        await page.wait_for_load_state("domcontentloaded")
+        await page.wait_for_timeout(1500)
+
+    async def _upload_image(self, page: Page, image_path: str) -> None:
+        image = Path(image_path)
+        if not image.exists():
+            log.warning(f"Dzen image was not found: {image_path}")
+            return
+
+        file_input = page.locator('input[type="file"]').first
+        if await file_input.count() == 0:
+            await self._click_first(
+                page,
+                [
+                    '[data-testid*="image"]',
+                    '[aria-label*="изображ"]',
+                    '[aria-label*="картин"]',
+                    'button:has-text("Фото")',
+                    'button:has-text("Изображение")',
+                ],
+                timeout=5000,
+                required=False,
+            )
+            file_input = page.locator('input[type="file"]').first
+
+        if await file_input.count() == 0:
+            log.warning("Dzen image upload input was not found")
+            return
+
+        await file_input.set_input_files(str(image.resolve()))
+        await page.wait_for_timeout(3000)
+
+    async def _fill_title(self, page: Page, title: str) -> None:
+        title = title.strip()
+        await self._fill_first(
+            page,
+            [
+                '[data-testid*="title"] textarea',
+                '[data-testid*="title"] input',
+                'textarea[placeholder*="Заголов"]',
+                'input[placeholder*="Заголов"]',
+                '[contenteditable="true"][data-placeholder*="Заголов"]',
+            ],
+            title,
+            timeout=7000,
+        )
+
+    async def _fill_description(self, page: Page, description: str) -> None:
+        description = description.strip()
+        contenteditable = page.locator('[contenteditable="true"]')
+        if await contenteditable.count() > 1:
+            editor = contenteditable.nth(1)
+            await editor.click()
+            await page.keyboard.insert_text(description)
+            return
+
+        await self._fill_first(
+            page,
+            [
+                '[data-testid*="editor"] [contenteditable="true"]',
+                '[role="textbox"][contenteditable="true"]',
+                'textarea[placeholder*="Текст"]',
+                '[contenteditable="true"]',
+            ],
+            description,
+            timeout=7000,
+        )
+
+    async def _save_draft(self, page: Page) -> None:
+        clicked = await self._click_first(
+            page,
+            [
+                '[data-testid*="save"]',
+                'button:has-text("Сохранить")',
+                'button:has-text("Черновик")',
+                'text=Сохранить',
+            ],
+            timeout=5000,
+            required=False,
+        )
+
+        if clicked:
+            await page.wait_for_timeout(2000)
+        else:
+            # Dzen editor usually autosaves drafts. Wait a little to let it finish.
+            await page.wait_for_timeout(5000)
+
+    async def _click_first(
+        self,
+        page: Page,
+        selectors: list[str],
+        timeout: int = 5000,
+        required: bool = True,
+    ) -> bool:
+        for selector in selectors:
+            try:
+                await page.locator(selector).first.click(timeout=timeout)
+                return True
+            except PlaywrightTimeoutError:
+                continue
+
+        if required:
+            raise RuntimeError(f"Could not click any selector: {selectors}")
+        return False
+
+    async def _fill_first(
+        self,
+        page: Page,
+        selectors: list[str],
+        value: str,
+        timeout: int = 5000,
+    ) -> None:
+        for selector in selectors:
+            locator = page.locator(selector).first
+            try:
+                await locator.wait_for(state="visible", timeout=timeout)
+                await locator.click()
+                await locator.fill(value)
+                return
+            except PlaywrightTimeoutError:
+                continue
+            except Exception:
+                try:
+                    await locator.click()
+                    await page.keyboard.insert_text(value)
+                    return
+                except Exception:
+                    continue
+
+        raise RuntimeError(f"Could not fill any selector: {selectors}")
+
+
+dzen_post_service = DzenPostService(
+    storage_state_path=os.getenv("DZEN_STORAGE_STATE_PATH", "./dzen_state.json"),
+    headless=os.getenv("DZEN_HEADLESS", "true").lower() == "true",
+)
