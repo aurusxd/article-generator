@@ -23,9 +23,7 @@ class TelegramPostService:
             
             if with_photo and image_path:
                 _, clean_text = extract_photo_description(post_text)
-                lines = clean_text.strip().split("\n")
-                caption_raw = "\n".join(lines[:2]) if len(lines) > 1 else lines[0]
-                caption = truncate_text(sanitize_html(caption_raw.strip()), 1024)
+                caption = truncate_text(sanitize_html(clean_text.strip()), 1024)
                 await self.bot.send_photo(
                     self.channel_id,
                     photo=FSInputFile(image_path),
