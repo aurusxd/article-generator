@@ -25,4 +25,4 @@ async def show_topics(callback: CallbackQuery):
 
     answer = await ask_agent(topic.name, topic.description)
     res = sanitize_html(answer)
-    await callback.message.answer(res)
+    await callback.message.answer(res,parse_mode="HTML")
