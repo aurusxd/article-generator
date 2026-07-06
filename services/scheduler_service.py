@@ -8,6 +8,7 @@ from services.topic_service import topic_service
 from services.publication_log_service import publication_log_service
 from telegram.bot import bot
 from utils.publish_times import generate_publish_times, is_time_to_publish
+from services.dzen_posting import save_dzen_article_from_text
 
 class SchedulerService:
     def __init__(self) -> None:
@@ -98,7 +99,8 @@ class SchedulerService:
                             error="article_not_generated",
                         )
                         continue
-
+                    
+                    suc = await save_dzen_article_from_text(article,image_path)
                     success = await self.telegram_post_service.publish_article(
                         text=article,
                         with_photo=topic.with_photo,
@@ -111,7 +113,11 @@ class SchedulerService:
                         status="success" if success else "error",
                         planned_time=times
                     )
-                    
+                    if suc:
+                        log.success("dzen yes")
+                    else:
+                        log.exception("Dzen no")
+
                     if success:
                         log.info(f"Автопостинг выполнен. Тема: {topic.name}")
                     else:
