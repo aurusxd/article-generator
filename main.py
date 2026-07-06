@@ -7,6 +7,7 @@ from telegram.handlers.topic import router as topics_router
 from telegram.handlers.create_topic import router as create_topic_router
 from telegram.keyboards.callback import router as default_router
 from telegram.handlers.generate_article import router as generate_article_router
+from telegram.handlers.stats import router as stat_router
 async def main():
     try:
         log.info("🚀 Запуск бота")
@@ -14,6 +15,7 @@ async def main():
         dp.include_router(create_topic_router)
         dp.include_router(default_router)
         dp.include_router(generate_article_router)
+        dp.include_router(stat_router)
 
         scheduler_service.start()
 
