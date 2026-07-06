@@ -117,6 +117,7 @@ class TopicService:
         description: str | None = None,
         posts_per_day: int | None = None,
         is_enabled: bool | None = None,
+        with_photo: bool | None = None,
     ) -> Topic | None:
         try:
             topic = await session.scalar(
@@ -137,6 +138,9 @@ class TopicService:
 
             if is_enabled is not None:
                 topic.is_enabled = is_enabled
+            
+            if with_photo is not None:
+                topic.with_photo = with_photo
 
             await session.commit()
             await session.refresh(topic)

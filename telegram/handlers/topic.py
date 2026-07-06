@@ -82,7 +82,7 @@ async def open_topic(
     builder.button(
         text="📷 С фото" if topic.with_photo else "📷 Без фото",
         callback_data=TopicCallback(
-            action="edit_photo",
+            action="photo",
             topic_id=topic.id,
         ).pack(),
     )
@@ -250,3 +250,21 @@ async def delete_topic(
     )
 
     await callback.message.edit_text("Топик удален",reply_markup=keyboard)
+
+@router.callback_query(TopicCallback.filter(F.action == "photo"))
+async def photo(
+    callback: CallbackQuery,
+    callback_data: TopicCallback,
+):
+    topic = await topic_service.get_topic_by_id(callback_data.topic_id)
+
+    if topic is None:
+        await callback.answer("Тематика не найдена", show_alert=True)
+        return
+
+    await topic_service.update_topic(
+        topic_id=topic.id,
+        with_photo=not topic.with_photo
+    )
+
+    await callback.message.edit_text("Статус изменен",reply_markup=keyboard)
