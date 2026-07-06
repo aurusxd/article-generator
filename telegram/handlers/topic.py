@@ -117,6 +117,7 @@ async def open_topic(
             f"Описание:\n{topic.description}\n\n"
             f"Публикаций в день: {topic.posts_per_day}\n"
             f"Статус: {'🟢 Включена' if topic.is_enabled else '🔴 Выключена'}"
+            f"Фото: {'✅ Да' if topic.with_photo else '❌ Нет'}\n"
         ),
         reply_markup=builder.as_markup(),
     )
