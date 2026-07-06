@@ -7,6 +7,8 @@ from telegram.states.topic import CreateTopicState
 from services.deepseek_service import ask_agent
 import random
 
+from utils.other import sanitize_html
+
 router = Router()
 
 
@@ -22,4 +24,5 @@ async def show_topics(callback: CallbackQuery):
     topic = random.choice(topics)
 
     answer = await ask_agent(topic.name, topic.description)
-    await callback.message.answer(answer)
+    res = sanitize_html(answer)
+    await callback.message.answer(res)
