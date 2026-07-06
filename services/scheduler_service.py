@@ -88,6 +88,7 @@ class SchedulerService:
 
             success = await self.telegram_post_service.publish_article(
                 text=article,
+                with_photo=topic.with_photo
             )
 
             if success:
