@@ -147,6 +147,7 @@ class DzenPostService:
 
         await page.wait_for_load_state("domcontentloaded")
         await page.wait_for_timeout(1500)
+        await self._close_help_popup(page)
 
     async def _upload_image(self, page: Page, image_path: str) -> None:
         image = Path(image_path)
@@ -155,63 +156,48 @@ class DzenPostService:
             return
 
         file_input = page.locator('input[type="file"]').first
-        if await file_input.count() == 0:
-            await self._click_first(
-                page,
-                [
-                    '[data-testid*="image"]',
-                    '[aria-label*="изображ"]',
-                    '[aria-label*="картин"]',
-                    'button:has-text("Фото")',
-                    'button:has-text("Изображение")',
-                ],
-                timeout=5000,
-                required=False,
-            )
-            file_input = page.locator('input[type="file"]').first
-
-        if await file_input.count() == 0:
-            log.warning("Dzen image upload input was not found")
-            return
-
-        await file_input.set_input_files(str(image.resolve()))
+        if await file_input.count() > 0:
+            await file_input.set_input_files(str(image.resolve()))
+        else:
+            try:
+                async with page.expect_file_chooser(timeout=5000) as file_chooser_info:
+                    await self._click_first(
+                        page,
+                        [
+                            'button[data-tip="Вставить изображение"]',
+                            'button:has(svg use[href*="add_gallery"])',
+                            'button:has(svg use[xlink\\:href*="add_gallery"])',
+                            '.article-editor-desktop--side-button__sideButton-1z',
+                        ],
+                        timeout=5000,
+                    )
+                file_chooser = await file_chooser_info.value
+                await file_chooser.set_files(str(image.resolve()))
+            except PlaywrightTimeoutError:
+                log.warning("Dzen image upload button was not found")
+                return
         await page.wait_for_timeout(3000)
 
     async def _fill_title(self, page: Page, title: str) -> None:
         title = title.strip()
-        await self._fill_first(
+        await self._fill_contenteditable(
             page,
-            [
-                '[data-testid*="title"] textarea',
-                '[data-testid*="title"] input',
-                'textarea[placeholder*="Заголов"]',
-                'input[placeholder*="Заголов"]',
-                '[contenteditable="true"][data-placeholder*="Заголов"]',
-            ],
+            page.locator(
+                '.article-editor-desktop--editor__titleInput-2D '
+                '[contenteditable="true"][role="textbox"]'
+            ).first,
             title,
-            timeout=7000,
         )
 
     async def _fill_description(self, page: Page, description: str) -> None:
         description = description.strip()
-        contenteditable = page.locator('[contenteditable="true"]')
-        if await contenteditable.count() > 1:
-            editor = contenteditable.nth(1)
-            await editor.click()
-            await page.keyboard.insert_text(description)
-            return
+        editor = page.locator('[aria-describedby="placeholder-ZenDraftEditor"]').first
+        if await editor.count() == 0:
+            contenteditable = page.locator('[contenteditable="true"][role="textbox"]')
+            if await contenteditable.count() > 1:
+                editor = contenteditable.nth(1)
 
-        await self._fill_first(
-            page,
-            [
-                '[data-testid*="editor"] [contenteditable="true"]',
-                '[role="textbox"][contenteditable="true"]',
-                'textarea[placeholder*="Текст"]',
-                '[contenteditable="true"]',
-            ],
-            description,
-            timeout=7000,
-        )
+        await self._fill_contenteditable(page, editor, description)
 
     async def _save_draft(self, page: Page) -> None:
         clicked = await self._click_first(
@@ -249,6 +235,25 @@ class DzenPostService:
         if required:
             raise RuntimeError(f"Could not click any selector: {selectors}")
         return False
+
+    async def _close_help_popup(self, page: Page) -> None:
+        await self._click_first(
+            page,
+            [
+                '.article-editor-desktop--help-popup__closeCross-Lj',
+                '[role="dialog"] [aria-label="Закрыть"]',
+                '[aria-label="Закрыть"]',
+            ],
+            timeout=2000,
+            required=False,
+        )
+
+    async def _fill_contenteditable(self, page: Page, locator, value: str) -> None:
+        await locator.wait_for(state="visible", timeout=7000)
+        await locator.click()
+        await locator.press("Control+A")
+        await locator.press("Backspace")
+        await page.keyboard.insert_text(value)
 
     async def _fill_first(
         self,
