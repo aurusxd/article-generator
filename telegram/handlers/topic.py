@@ -80,6 +80,15 @@ async def open_topic(
     )
 
     builder.button(
+        text="📷 С фото" if topic.with_photo else "📷 Без фото",
+        callback_data=TopicCallback(
+            action="edit_photo",
+            topic_id=topic.id,
+        ).pack(),
+    )
+
+
+    builder.button(
         text="⏸ Выключить" if topic.is_enabled else "▶️ Включить",
         callback_data=TopicCallback(
             action="toggle",

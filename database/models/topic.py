@@ -1,7 +1,7 @@
 
 from datetime import datetime
 
-from sqlalchemy import DateTime, Integer, String, Text, func
+from sqlalchemy import DateTime, Integer, String, Text, func, Boolean
 from sqlalchemy.orm import Mapped, mapped_column
 
 from database.models.base import Base
@@ -20,6 +20,7 @@ class Topic(Base):
     posts_per_day: Mapped[int] = mapped_column(Integer,nullable=False)
 
     is_enabled: Mapped[bool] = mapped_column(default=True)
+    with_photo: Mapped[bool] = mapped_column(default=False)
 
     created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True),default=func.now())
 
