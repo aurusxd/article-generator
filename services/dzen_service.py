@@ -6,6 +6,7 @@ from pathlib import Path
 from playwright.async_api import Page, TimeoutError as PlaywrightTimeoutError, async_playwright
 
 from services.logger import log
+from utils.other import remove_html_tags
 
 
 class _TextExtractor(HTMLParser):
@@ -110,8 +111,8 @@ class DzenPostService:
     ) -> bool:
         title, description = split_title_and_description(text)
         return await self.save_article(
-            title=title,
-            description=description,
+            title=remove_html_tags(title),
+            description=remove_html_tags(title),
             image_path=image_path,
         )
 

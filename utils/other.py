@@ -103,3 +103,8 @@ def extract_photo_description(text: str):
 
 def truncate_text(text: str, limit: int = 1024) -> str:
     return text if len(text) <= limit else text[:limit - 3] + "..."
+
+def remove_html_tags(text):
+    # Компилируем шаблон для поиска тегов и заменяем их на пустую строку
+    clean_pattern = re.compile(r'<.*?>')
+    return re.sub(clean_pattern, '', text)
