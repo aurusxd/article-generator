@@ -19,5 +19,4 @@ dependencies = [
     "requests>=2.34.2",
     "sqlalchemy>=2.0.51",
     "uvicorn>=0.50.0",
-    "yandex-ai-studio-sdk>=0.22.0",
 ]

@@ -164,7 +164,6 @@ dependencies = [
     { name = "requests" },
     { name = "sqlalchemy" },
     { name = "uvicorn" },
-    { name = "yandex-ai-studio-sdk" },
 ]
 
 [package.metadata]
@@ -183,7 +182,6 @@ requires-dist = [
     { name = "requests", specifier = ">=2.34.2" },
     { name = "sqlalchemy", specifier = ">=2.0.51" },
     { name = "uvicorn", specifier = ">=0.50.0" },
-    { name = "yandex-ai-studio-sdk", specifier = ">=0.22.0" },
 ]
 
 [[package]]
@@ -1100,46 +1098,6 @@ wheels = [
     { url = "https://files.pythonhosted.org/packages/d1/6f/9fa5d59fb06d890defb5a8f727ce6a14d2932c8760153f96956628559fee/wrapt-2.2.2-cp313-cp313t-win_amd64.whl", hash = "sha256:305d4c247d61c4115794a169141823c62f719525ddb90b23aa332741c77d2c28", size = 82005, upload-time = "2026-06-20T23:48:46.391Z" },
     { url = "https://files.pythonhosted.org/packages/15/80/4c7bd9873d1f9f7d138d93556b500469dbe24f42710b877519c2b9eb380d/wrapt-2.2.2-cp313-cp313t-win_arm64.whl", hash = "sha256:c20279cd1a29800815d7b2d6338b60a6c6e78263f9d6e62e0eda251ba9cae2d0", size = 80762, upload-time = "2026-06-20T23:48:47.964Z" },
     { url = "https://files.pythonhosted.org/packages/6e/d2/6317eb6d4554855bbf12d61857774af34747bf88a42c19bf306de67e2fa3/wrapt-2.2.2-py3-none-any.whl", hash = "sha256:5bad217350f19ce99ca5b5e71d406765ea86fe541628426772b657375ee1c048", size = 61460, upload-time = "2026-06-20T23:49:42.966Z" },
-]
-
-[[package]]
-name = "yandex-ai-studio-sdk"
-version = "0.22.0"
-source = { registry = "https://pypi.org/simple" }
-dependencies = [
-    { name = "aiofiles" },
-    { name = "click" },
-    { name = "get-annotations" },
-    { name = "grpcio" },
-    { name = "httpx" },
-    { name = "httpx-sse" },
-    { name = "packaging" },
-    { name = "typing-extensions" },
-    { name = "yandexcloud" },
-]
-sdist = { url = "https://files.pythonhosted.org/packages/f7/48/b3de7e832c78473d75af81632c3d25100e9dc0e01254b290a5e7faa4e4b8/yandex_ai_studio_sdk-0.22.0.tar.gz", hash = "sha256:10fce2033be5c4fcbe1fcf485e29593867b459c96a73bc30519e4bc336fc7400", size = 236107, upload-time = "2026-06-30T14:30:33.059Z" }
-wheels = [
-    { url = "https://files.pythonhosted.org/packages/f7/8b/79f2dd93984ba217de6088927f3e225d0149a58fccaca1f0c594a807aede/yandex_ai_studio_sdk-0.22.0-py3-none-any.whl", hash = "sha256:3ecb0446942b5048e9023f55fc74463c65e823a79eceda65c6d4178ca57601c2", size = 349500, upload-time = "2026-06-30T14:30:30.738Z" },
-]
-
-[[package]]
-name = "yandexcloud"
-version = "0.397.0"
-source = { registry = "https://pypi.org/simple" }
-dependencies = [
-    { name = "cryptography" },
-    { name = "deprecated" },
-    { name = "googleapis-common-protos" },
-    { name = "grpcio" },
-    { name = "grpcio-tools" },
-    { name = "protobuf" },
-    { name = "pyjwt" },
-    { name = "requests" },
-    { name = "six" },
-]
-sdist = { url = "https://files.pythonhosted.org/packages/bd/7a/0578a814bde7220c5cbe51d320d8d7cc805713f3166ac9d88c988d21cd31/yandexcloud-0.397.0.tar.gz", hash = "sha256:c23ad410679bd22165cf71ffab497a4ee3761026577a602df269845ffae032d6", size = 4060131, upload-time = "2026-06-29T16:22:11.622Z" }
-wheels = [
-    { url = "https://files.pythonhosted.org/packages/16/3a/cb92b6737278856b5207e4ad5c7e68c475520ac138ce51f0fc92d2a0269b/yandexcloud-0.397.0-py3-none-any.whl", hash = "sha256:30d12a5dd6ee3bfe3a7c256531d2a01f9b8ba705d98dca66f13273bf4562335d", size = 6267850, upload-time = "2026-06-29T16:22:09.591Z" },
 ]
 
 [[package]]
