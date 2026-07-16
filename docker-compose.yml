@@ -12,7 +12,9 @@ services:
     ports:
       - "5433:5432"
   bot:
-    build: .
+    build:
+      context: .
+      target: bot
 
     restart: always
 
@@ -22,7 +24,9 @@ services:
     depends_on:
       - db
   api:
-    build: .
+    build:
+      context: .
+      target: runtime
     command: uv run uvicorn api.main:app --host 127.0.0.1 --port 8000
     ports:
       - "8000:8000"
@@ -31,7 +35,9 @@ services:
     depends_on:
       - db
   migrations:
-    build: .
+    build:
+      context: .
+      target: runtime
     command: uv run alembic upgrade head
     env_file:
       - .env
