@@ -102,6 +102,46 @@ class PublicationLogService:
             return True
 
     @provider.inject_session
+    async def was_attempted_today_at(
+        self,
+        topic_id: int,
+        platform: str,
+        planned_time: time,
+        session: AsyncSession,
+    ) -> bool:
+        """Return whether this publication slot has already been processed today.
+
+        Both successful and failed attempts count. This prevents the scheduler
+        from regenerating an article on every tick while the same time window
+        remains open after a publication error.
+        """
+        try:
+            now = datetime.now(timezone.utc)
+            start_of_day = datetime.combine(
+                now.date(),
+                time.min,
+                tzinfo=timezone.utc,
+            )
+
+            existing_log = await session.scalar(
+                select(PublicationLog.id)
+                .where(PublicationLog.topic_id == topic_id)
+                .where(PublicationLog.platform == platform)
+                .where(PublicationLog.planned_time == planned_time)
+                .where(PublicationLog.created_at >= start_of_day)
+                .limit(1)
+            )
+
+            return existing_log is not None
+
+        except SQLAlchemyError:
+            log.exception(
+                "Ошибка при проверке попытки публикации по слоту"
+            )
+            # On a database error, skipping is safer than generating duplicates.
+            return True
+
+    @provider.inject_session
     async def get_last_logs(
         self,
         session: AsyncSession,

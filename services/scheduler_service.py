@@ -74,12 +74,12 @@ class SchedulerService:
                     if not is_time_to_publish(times):
                         continue
 
-                    already_published = await publication_log_service.was_published_today_at(
+                    already_attempted = await publication_log_service.was_attempted_today_at(
                         topic_id=topic.id,
                         planned_time=times,
                         platform="telegram"
                     )
-                    if already_published:
+                    if already_attempted:
                         continue
 
                     article, image_path = await ask_agent(
