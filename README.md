@@ -231,6 +231,13 @@ XAI_API_KEY=
 XAI_IMAGE_MODEL=grok-imagine-image-quality
 XAI_IMAGE_ASPECT_RATIO=1:1
 XAI_IMAGE_RESOLUTION=1k
+
+# Генерация изображений: cloudflare или xai
+IMAGE_PROVIDER=cloudflare
+CLOUDFLARE_ACCOUNT_ID=
+CLOUDFLARE_API_TOKEN=
+CLOUDFLARE_IMAGE_MODEL=@cf/black-forest-labs/flux-1-schnell
+CLOUDFLARE_IMAGE_STEPS=4
 ```
 
 ---
