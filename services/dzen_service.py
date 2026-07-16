@@ -112,7 +112,7 @@ class DzenPostService:
         title, description = split_title_and_description(text)
         return await self.save_article(
             title=remove_html_tags(title),
-            description=remove_html_tags(title),
+            description=remove_html_tags(description),
             image_path=image_path,
         )
 

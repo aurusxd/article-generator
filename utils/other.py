@@ -104,6 +104,50 @@ def extract_photo_description(text: str):
 def truncate_text(text: str, limit: int = 1024) -> str:
     return text if len(text) <= limit else text[:limit - 3] + "..."
 
+
+def truncate_html(text: str, limit: int = 1024) -> str:
+    """Truncate Telegram HTML without cutting tags or leaving them open."""
+    if len(text) <= limit:
+        return text
+
+    token_pattern = re.compile(r"(<[^>]+>|&(?:#\d+|#x[0-9a-fA-F]+|\w+);)")
+    result: list[str] = []
+    stack: list[str] = []
+    current_length = 0
+
+    for token in token_pattern.split(text):
+        if not token:
+            continue
+
+        next_stack = stack.copy()
+        if token.startswith("<"):
+            closing = re.fullmatch(r"</\s*([a-zA-Z0-9]+)\s*>", token)
+            opening = re.fullmatch(r"<\s*([a-zA-Z0-9]+)(?:\s+[^>]*)?>", token)
+            if closing:
+                if next_stack and next_stack[-1] == closing.group(1).lower():
+                    next_stack.pop()
+            elif opening and not token.rstrip().endswith("/>"):
+                next_stack.append(opening.group(1).lower())
+
+        next_closings = "".join(f"</{tag}>" for tag in reversed(next_stack))
+        available = limit - current_length - len(next_closings) - 3
+        if len(token) <= available:
+            result.append(token)
+            current_length += len(token)
+            stack = next_stack
+            continue
+
+        # Tags and entities are atomic. Plain text can safely be sliced.
+        is_markup = bool(
+            re.fullmatch(r"<[^>]+>|&(?:#\d+|#x[0-9a-fA-F]+|\w+);", token)
+        )
+        if not is_markup and available > 0:
+            result.append(token[:available])
+        break
+
+    closing_tags = "".join(f"</{tag}>" for tag in reversed(stack))
+    return f"{''.join(result)}...{closing_tags}"
+
 def remove_html_tags(text):
     # Компилируем шаблон для поиска тегов и заменяем их на пустую строку
     clean_pattern = re.compile(r'<.*?>')

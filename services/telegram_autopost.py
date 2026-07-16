@@ -3,7 +3,7 @@ from aiogram.exceptions import TelegramAPIError
 from aiogram.types import FSInputFile
 
 from services.logger import log
-from utils.other import extract_photo_description, sanitize_html,truncate_text
+from utils.other import extract_photo_description, sanitize_html, truncate_html
 
 
 class TelegramPostService:
@@ -23,7 +23,7 @@ class TelegramPostService:
             
             if with_photo and image_path:
                 _, clean_text = extract_photo_description(post_text)
-                caption = truncate_text(sanitize_html(clean_text.strip()), 1024)
+                caption = truncate_html(sanitize_html(clean_text.strip()), 1024)
                 await self.bot.send_photo(
                     self.channel_id,
                     photo=FSInputFile(image_path),
