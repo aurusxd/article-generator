@@ -202,22 +202,29 @@ class DzenPostService:
 
     async def _save_draft(self, page: Page) -> None:
         clicked = await self._click_first(
-            page,
-            [
-                '[data-testid*="save"]',
-                'button:has-text("Сохранить")',
-                'button:has-text("Черновик")',
-                'text=Сохранить',
-            ],
-            timeout=5000,
-            required=False,
-        )
+                    page,
+                    [
+                        '[data-testid*="save"]',
+                        'button:has-text("Опубликовать")',
+                        'button:has-text("Черновик")',
+                        'text=Сохранить',
+                    ],
+                    timeout=5000,
+                    required=False,
+                )
 
         if clicked:
             await page.wait_for_timeout(2000)
         else:
-            # Dzen editor usually autosaves drafts. Wait a little to let it finish.
+                # Dzen editor usually autosaves drafts. Wait a little to let it finish.
             await page.wait_for_timeout(5000)
+            
+            publish_button = page.locator('[data-testid="publish-btn"]')
+
+            await publish_button.wait_for(state="visible", timeout=10000)
+
+            await publish_button.click(timeout=10000)
+            log.success("Финальная кнопка публикации нажата")
 
     async def _click_first(
         self,
