@@ -119,7 +119,22 @@ class DzenPostService:
         )
 
     async def _open_article_editor(self, page: Page) -> None:
-        await page.goto("https://dzen.ru", wait_until="domcontentloaded")
+        await page.goto("https://dzen.ru", wait_until="domcontentloaded",timeout=60_000)
+
+        await page.wait_for_timeout(5_000)
+
+        log.info("Current Dzen URL: {}", page.url)
+        log.info("Dzen page title: {}", await page.title())
+
+        await page.screenshot(
+            path="debug/dzen_home.png",
+            full_page=True,
+        )
+
+        html = await page.content()
+
+        with open("debug/dzen_home.html", "w", encoding="utf-8") as file:
+            file.write(html)
 
         await self._click_first(
             page,
