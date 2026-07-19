@@ -80,7 +80,7 @@ def build_user_promt(topic: str,description: str,with_photo: bool):
     - Заключение.
 
     Размер:
-    не больше 800 символов.
+    не больше 1500 символов.
 
     Статья должна:
 

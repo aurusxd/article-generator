@@ -87,11 +87,13 @@ class DzenPostService:
                 try:
                     await self._open_article_editor(page)
 
+                    await self._fill_title(page, title)
                     if image_path:
                         await self._upload_image(page, image_path)
+                        await self._fill_description_with_photo(page, description)
 
-                    await self._fill_title(page, title)
-                    await self._fill_description(page, description)
+                    else:
+                        await self._fill_description(page, description)
                     await self._save_draft(page)
 
                     log.info(f"Dzen draft saved. Title: {title}")
@@ -152,32 +154,49 @@ class DzenPostService:
 
     async def _upload_image(self, page: Page, image_path: str) -> None:
         image = Path(image_path)
+
         if not image.exists():
-            log.warning(f"Dzen image was not found: {image_path}")
+            print(f"Файл не существует: {image_path}")
             return
 
-        file_input = page.locator('input[type="file"]').first
+        # Открываем модальное окно
+        await self._click_first(
+            page,
+            [
+                'button[data-tip="Вставить изображение"]',
+                'button:has(svg use[href*="add_gallery"])',
+                'button:has(svg use[xlink\\:href*="add_gallery"])',
+                '.article-editor-desktop--side-button__sideButton-1z',
+            ],
+            timeout=10000,
+        )
+
+        await page.get_by_role(
+            "button",
+            name="Загрузите файл",
+            exact=True,
+        ).wait_for(state="visible", timeout=10000)
+
+        # Ищем input после открытия модального окна
+        file_input = page.locator('input[type="file"]').last
+
         if await file_input.count() > 0:
             await file_input.set_input_files(str(image.resolve()))
-        else:
-            try:
-                async with page.expect_file_chooser(timeout=5000) as file_chooser_info:
-                    await self._click_first(
-                        page,
-                        [
-                            'button[data-tip="Вставить изображение"]',
-                            'button:has(svg use[href*="add_gallery"])',
-                            'button:has(svg use[xlink\\:href*="add_gallery"])',
-                            '.article-editor-desktop--side-button__sideButton-1z',
-                        ],
-                        timeout=5000,
-                    )
-                file_chooser = await file_chooser_info.value
-                await file_chooser.set_files(str(image.resolve()))
-            except PlaywrightTimeoutError:
-                log.warning("Dzen image upload button was not found")
-                return
-        await page.wait_for_timeout(3000)
+            print(f"Изображение загружено: {image.resolve()}")
+            return
+
+        # Если input отсутствует — используем file chooser
+        upload_button = page.get_by_role(
+            "button",
+            name="Загрузите файл",
+            exact=True,
+        )
+
+        async with page.expect_file_chooser(timeout=10000) as chooser_info:
+            await upload_button.click()
+
+        chooser = await chooser_info.value
+        await chooser.set_files(str(image.resolve()))
 
     async def _fill_title(self, page: Page, title: str) -> None:
         title = title.strip()
@@ -189,6 +208,44 @@ class DzenPostService:
             ).first,
             title,
         )
+
+    async def _fill_description_with_photo(self, page: Page, description: str) -> None:
+        editors = page.locator(
+            '.public-DraftEditor-content'
+            '[contenteditable="true"]:visible'
+        )
+
+        count = await editors.count()
+        print("Редакторов найдено:", count)
+
+        if count == 0:
+            raise RuntimeError("Редакторы Draft.js не найдены")
+
+        # Пока выбираем второй редактор
+        editor = editors.nth(0)
+
+        # Внутренний абзац Draft.js
+        blocks = editor.locator('div[data-block="true"]')
+
+        if await blocks.count() > 0:
+            target = blocks.last
+        else:
+            target = editor
+
+        await target.scroll_into_view_if_needed()
+
+        # Проверяем, что фокус действительно внутри нужного редактора
+        focused = await editor.evaluate("""
+            el => el === document.activeElement
+                || el.contains(document.activeElement)
+        """)
+
+        log.info("Фокус внутри выбранного редактора:", focused)
+
+        await page.keyboard.insert_text(description)
+
+        await page.wait_for_timeout(1000)
+
 
     async def _fill_description(self, page: Page, description: str) -> None:
         description = description.strip()
