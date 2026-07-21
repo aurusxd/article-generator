@@ -317,19 +317,39 @@ class DzenPostService:
         return False
 
     async def _close_help_popup(self, page: Page) -> None:
-        await self._click_first(
+        overlay = page.locator('[class*="help-popup__overlay"]').first
+        if await overlay.count() == 0:
+            return
+
+        # Dzen uses CSS modules, so generated class suffixes can change.
+        closed = await self._click_first(
             page,
             [
-                '.article-editor-desktop--help-popup__closeCross-Lj',
-                '[role="dialog"] [aria-label="Закрыть"]',
-                '[aria-label="Закрыть"]',
+                '[class*="help-popup__closeCross"]',
+                '[class*="help-popup"] button[aria-label]',
+                '[class*="help-popup"] button',
+                '[role="dialog"] button[aria-label]',
             ],
             timeout=2000,
             required=False,
         )
 
+        if not closed:
+            await page.keyboard.press("Escape")
+
+        try:
+            await overlay.wait_for(state="hidden", timeout=2000)
+        except PlaywrightTimeoutError:
+            # This is a non-essential onboarding popup. Remove only its overlay
+            # if Dzen changes the close control again.
+            await page.locator('[class*="help-popup__overlay"]').evaluate_all(
+                "elements => elements.forEach(element => element.remove())"
+            )
+            log.warning("Dzen help popup had to be removed from the page")
+
     async def _fill_contenteditable(self, page: Page, locator, value: str) -> None:
         await locator.wait_for(state="visible", timeout=7000)
+        await self._close_help_popup(page)
         await locator.click()
         await locator.press("Control+A")
         await locator.press("Backspace")
